@@ -1,0 +1,29 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  display: flex;
+  background: #f3f4f6;
+  color: #333;
+}
+
+/* Component-specific rules were moved to `public/css/components/*`.
+   Keep core layout and minimal utilities here. */
+
+/* --- Main --- */
+main {
+  margin-left: 0;
+  flex: 1;
+  padding: 1rem;
+  transition: margin-left 0.3s ease;
+}
+
+main.shift { margin-left: 220px }
+
+/* Utilities */
+.container { max-width: 1100px; margin: 0 auto }
+.visually-hidden { position: absolute !important; height: 1px; width: 1px; overflow: hidden; clip: rect(1px,1px,1px,1px) }
