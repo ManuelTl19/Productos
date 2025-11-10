@@ -1,27 +1,111 @@
-// 1.- Importar express
+// routes/proveedor.routes.js
 const express = require('express');
-//2.- Crear router
-const router= express.Router(); // Con esta linea se pueden crear distintas rutas
+const router = express.Router();
+const ProveedorController = require('../controllers/proveedor.controller');
 
-//3.- Cargar el controlador
-const ProoveedorController= require('../controllers/proveedor.controller');
+/**
+ * @openapi
+ * tags:
+ *   - name: Proveedores
+ *     description: Operaciones con proveedores
+ */
 
-//4.- Definir las rutas
+/**
+ * @openapi
+ * /api/proveedor/guardarRegistro:
+ *   post:
+ *     tags: [Proveedores]
+ *     summary: Crea un proveedor
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Proveedor'
+ *     responses:
+ *       201: { description: Creado }
+ */
+router.post('/guardarRegistro', ProveedorController.guardar);
 
-//Crear un proyecto
-router.post('/guardarRegistro', ProoveedorController.guardar);
+/**
+ * @openapi
+ * /api/proveedor/listar:
+ *   get:
+ *     tags: [Proveedores]
+ *     summary: Lista proveedores
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/Proveedor' }
+ */
+router.get('/listar', ProveedorController.listarTodos);
 
-//Listar todos los proyectos
-router.get('/listar', ProoveedorController.listarTodos);
+/**
+ * @openapi
+ * /api/proveedor/buscarid/{id}:
+ *   get:
+ *     tags: [Proveedores]
+ *     summary: Obtiene proveedor por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Proveedor' }
+ *       404: { description: No encontrado }
+ */
+router.get('/buscarid/:id', ProveedorController.BuscarId);
 
-//Listar un proyecto por ID
-router.get('/buscarid/:id', ProoveedorController.BuscarId);
+/**
+ * @openapi
+ * /api/proveedor/eliminar/{id}:
+ *   delete:
+ *     tags: [Proveedores]
+ *     summary: Elimina proveedor por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204: { description: Eliminado }
+ *       404: { description: No encontrado }
+ */
+router.delete('/eliminar/:id', ProveedorController.eliminar);
 
-//Eliminar un proyecto por ID
-router.delete('/eliminar/:id', ProoveedorController.eliminar);
+/**
+ * @openapi
+ * /api/proveedor/actualizar/{id}:
+ *   patch:
+ *     tags: [Proveedores]
+ *     summary: Actualiza proveedor por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/Proveedor' }
+ *     responses:
+ *       200:
+ *         description: Actualizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Proveedor' }
+ *       404: { description: No encontrado }
+ */
+router.patch('/actualizar/:id', ProveedorController.actualizar);
 
-//Actualizar un proyecto por ID
-router.patch('/actualizar/:id', ProoveedorController.actualizar);
-
-//5.- Exportar rutas
-module.exports= router;
+module.exports = router;

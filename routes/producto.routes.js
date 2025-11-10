@@ -1,27 +1,114 @@
-// 1.- Importar express
+// routes/producto.routes.js
 const express = require('express');
-//2.- Crear router
-const router= express.Router(); // Con esta linea se pueden crear distintas rutas
+const router = express.Router();
+const ProductoController = require('../controllers/producto.controller');
 
-//3.- Cargar el controlador
-const ProductoController= require('../controllers/producto.controller');
+/**
+ * @openapi
+ * tags:
+ *   - name: Productos
+ *     description: Operaciones con productos
+ */
 
-//4.- Definir las rutas
-
-//Crear un proyecto
+/**
+ * @openapi
+ * /api/productos/guardarRegistro:
+ *   post:
+ *     tags: [Productos]
+ *     summary: Crea un producto
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/Producto' }
+ *     responses:
+ *       201:
+ *         description: Creado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Producto' }
+ */
 router.post('/guardarRegistro', ProductoController.guardar);
 
-//Listar todos los proyectos
+/**
+ * @openapi
+ * /api/productos/listar:
+ *   get:
+ *     tags: [Productos]
+ *     summary: Lista productos
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/Producto' }
+ */
 router.get('/listar', ProductoController.listarTodos);
 
-//Listar un proyecto por ID
+/**
+ * @openapi
+ * /api/productos/buscarid/{id}:
+ *   get:
+ *     tags: [Productos]
+ *     summary: Obtiene producto por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Producto' }
+ *       404: { description: No encontrado }
+ */
 router.get('/buscarid/:id', ProductoController.BuscarId);
 
-//Eliminar un proyecto por ID
+/**
+ * @openapi
+ * /api/productos/eliminar/{id}:
+ *   delete:
+ *     tags: [Productos]
+ *     summary: Elimina producto por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204: { description: Eliminado }
+ *       404: { description: No encontrado }
+ */
 router.delete('/eliminar/:id', ProductoController.eliminar);
 
-//Actualizar un proyecto por ID
+/**
+ * @openapi
+ * /api/productos/actualizar/{id}:
+ *   patch:
+ *     tags: [Productos]
+ *     summary: Actualiza producto por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/Producto' }
+ *     responses:
+ *       200:
+ *         description: Actualizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Producto' }
+ *       404: { description: No encontrado }
+ */
 router.patch('/actualizar/:id', ProductoController.actualizar);
 
-//5.- Exportar rutas
-module.exports= router;
+module.exports = router;

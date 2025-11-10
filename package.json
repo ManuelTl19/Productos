@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@scalar/express-api-reference": "^0.8.24",
     "accepts": "^2.0.0",
     "acorn": "^7.4.1",
     "anymatch": "^3.1.3",
@@ -72,6 +73,7 @@
     "mongodb": "^6.20.0",
     "mongodb-connection-string-url": "^3.0.2",
     "mongoose": "^8.19.3",
+    "mongoose-to-swagger": "^1.5.1",
     "mpath": "^0.9.0",
     "mquery": "^5.0.0",
     "ms": "^2.1.3",
@@ -108,6 +110,7 @@
     "sparse-bitfield": "^3.0.3",
     "statuses": "^2.0.2",
     "supports-color": "^5.5.0",
+    "swagger-jsdoc": "^6.2.8",
     "swagger-ui-dist": "^5.29.4",
     "swagger-ui-express": "^5.0.1",
     "to-regex-range": "^5.0.1",
