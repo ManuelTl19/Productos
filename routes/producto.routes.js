@@ -28,7 +28,10 @@ const ProductoController = require('../controllers/producto.controller');
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Producto' }
  */
-router.post('/guardarRegistro', ProductoController.guardar);
+
+// en producto.routes.js
+router.post('/', ProductoController.guardar);
+
 
 /**
  * @openapi
