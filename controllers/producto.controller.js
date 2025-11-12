@@ -3,7 +3,7 @@ const ProductoDb = require('../models/productos.model');
 //Guardar un nuevo registro
 const guardar = async (req, res) => {
     try {
-        const { nombre, descripcion, precio,fechacaducidad,fechadecompra,Imagen,stock,provedoor } = req.body;
+        const { nombre, descripcion, precio,fechacaducidad,fechadecompra,Imagen,stock,provedoor,precioDeCompra } = req.body;
 
         // Validar que todos los campos obligatorios estén presentes
         if (!nombre || !descripcion || !precio||!fechacaducidad||!fechadecompra||!Imagen||!stock || !provedoor ) {
@@ -17,6 +17,7 @@ const guardar = async (req, res) => {
             nombre,
             descripcion,
             precio,
+            precioDeCompra,
             fechacaducidad,
             fechadecompra,
             Imagen,
@@ -44,7 +45,7 @@ const guardar = async (req, res) => {
 //Listar todos los registros
 const listarTodos = async (req, res) => {
     try {
-        const productos = await ProductoDb.find();
+        const productos = await ProductoDb.find().populate('provedoor').lean();
         return res.status(200).json({
             status: "success",
             message: "Lista de productos",
@@ -64,7 +65,7 @@ const listarTodos = async (req, res) => {
 const BuscarId = async (req, res) => {
     try {
         const id = req.params.id;
-        const producto = await ProductoDb.findById(id);
+        const producto = await ProductoDb.findById(id).populate('provedoor').lean();
 
         if (!producto) {
             return res.status(404).json({

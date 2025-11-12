@@ -6,4 +6,4 @@ const proveedorSchema = new Schema({
     descripcion: {type: String, required: true, trim: true,},
 });
 
-module.exports = model('Proveedor', proveedorSchema, 'proveedor');
+module.exports = model('proveedor', proveedorSchema, 'proveedor');

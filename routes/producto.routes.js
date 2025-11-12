@@ -30,7 +30,7 @@ const ProductoController = require('../controllers/producto.controller');
  */
 
 // en producto.routes.js
-router.post('/', ProductoController.guardar);
+router.post('/guardarRegistro', ProductoController.guardar);
 
 
 /**
