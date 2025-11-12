@@ -3,10 +3,10 @@ const ProductoDb = require('../models/productos.model');
 //Guardar un nuevo registro
 const guardar = async (req, res) => {
     try {
-        const { nombre, descripcion, precio,fechacaducidad,fechadecompra,Imagen,stock,provedoor,precioDeCompra } = req.body;
+        const { nombre, descripcion, precio, fechacaducidad, fechadecompra, Imagen, stock, provedoor, precioDeCompra } = req.body;
 
         // Validar que todos los campos obligatorios estén presentes
-        if (!nombre || !descripcion || !precio||!fechacaducidad||!fechadecompra||!Imagen||!stock || !provedoor ) {
+        if (!nombre || !descripcion || !precio || !fechacaducidad || !fechadecompra || !Imagen || !stock || !provedoor) {
             return res.status(400).json({
                 status: "error",
                 message: "Faltan campos obligatorios",
@@ -118,55 +118,83 @@ const eliminar = async (req, res) => {
 };
 
 const actualizar = async (req, res) => {
-      try {
-         //1.-recibir los datos
-         const id = req.params.id;   
-         const {nombre, descripcion} = req.body;
+    try {
+        const id = req.params.id;
+        const {
+            nombre,
+            descripcion,
+            precio,
+            precioDeCompra,
+            fechacaducidad,
+            fechadecompra,
+            Imagen,
+            stock,
+            provedoor
+        } = req.body;
 
-         if(!nombre && !descripcion){
-            return res.status(400).json(
-               {  
-                  status:"error",
-                  message:"Debe de proporcionar a menos un campo para actualiazr",   
-               }
-            )
-         }
-         const datosactualizar =  {};
-         if(nombre) datosactualizar.nombre = nombre;
-         if(descripcion) datosactualizar.descripcion = descripcion;
+        // Validar que al menos un campo se haya enviado
+        if (
+            !nombre &&
+            !descripcion &&
+            !precio &&
+            !precioDeCompra &&
+            !fechacaducidad &&
+            !fechadecompra &&
+            !Imagen &&
+            !stock &&
+            !provedoor
+        ) {
+            return res.status(400).json({
+                status: "error",
+                message: "Debe proporcionar al menos un campo para actualizar",
+            });
+        }
 
-          //buscar y actualizar el registro
-         const ProductoActualizada =  await ProductoDb.findByIdAndUpdate(id, datosactualizar, {new:true,//Devuelve el objeto actualizado
-         runValidators:true //Ejecuta las validaciones del Schema
-         });
-         if(!ProductoActualizada){
-            return res.status(404).json(
-               {
-                  status:"error",
-                  message:"Ropa no encontrada en la bd",
-               }
-            )
-         }
+        // Construir objeto dinámico con los campos que sí vienen
+        const datosactualizar = {};
+        if (nombre) datosactualizar.nombre = nombre;
+        if (descripcion) datosactualizar.descripcion = descripcion;
+        if (precio) datosactualizar.precio = precio;
+        if (precioDeCompra) datosactualizar.precioDeCompra = precioDeCompra;
+        if (fechacaducidad) datosactualizar.fechacaducidad = fechacaducidad;
+        if (fechadecompra) datosactualizar.fechadecompra = fechadecompra;
+        if (Imagen) datosactualizar.Imagen = Imagen;
+        if (stock) datosactualizar.stock = stock;
+        if (provedoor) datosactualizar.provedoor = provedoor;
 
-         //enviar una respuesta
-         return res.status(200).json(
-            {  
-               status:"success",
-               message:"Ropa actualizados en la bd",
-               //se envia el proyecto antes de ser actualizado
-               data: ProductoActualizada
-            }
-         )
-      } catch (error) {
-         console.error("Error al guardar un registro",error);
-         return res.status(500).json(
+        // Buscar y actualizar el registro
+        const productoActualizado = await ProductoDb.findByIdAndUpdate(
+            id,
+            datosactualizar,
             {
-               message:"Error en el servidor",
-               error: error.message
+                new: true,          // Devuelve el objeto actualizado
+                runValidators: true // Ejecuta validaciones del schema
             }
-         );
-      }
-   };
+        ).populate('provedoor'); // Si quieres incluir los datos del proveedor
+
+        if (!productoActualizado) {
+            return res.status(404).json({
+                status: "error",
+                message: "Producto no encontrado en la base de datos",
+            });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            message: "Producto actualizado correctamente",
+            data: productoActualizado,
+        });
+
+    } catch (error) {
+        console.error("Error al actualizar el producto:", error);
+        return res.status(500).json({
+            status: "error",
+            message: "Error en el servidor",
+            error: error.message,
+        });
+    }
+};
+
 
 module.exports = {
     guardar,
