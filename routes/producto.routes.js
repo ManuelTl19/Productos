@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const ProductoController = require('../controllers/producto.controller');
+const auth = require('../middleware/auth');
+const requireRole = require('../middleware/roles');
 
 /**
  * @openapi
@@ -30,7 +32,7 @@ const ProductoController = require('../controllers/producto.controller');
  */
 
 // en producto.routes.js
-router.post('/guardarRegistro', ProductoController.guardar);
+router.post('/guardarRegistro', auth, requireRole('admin', 'gerente'), ProductoController.guardar);
 
 
 /**
@@ -48,7 +50,7 @@ router.post('/guardarRegistro', ProductoController.guardar);
  *               type: array
  *               items: { $ref: '#/components/schemas/Producto' }
  */
-router.get('/listar', ProductoController.listarTodos);
+router.get('/listar', auth, requireRole('admin', 'gerente', 'cajero'), ProductoController.listarTodos);
 
 /**
  * @openapi
@@ -69,7 +71,7 @@ router.get('/listar', ProductoController.listarTodos);
  *             schema: { $ref: '#/components/schemas/Producto' }
  *       404: { description: No encontrado }
  */
-router.get('/buscarid/:id', ProductoController.BuscarId);
+router.get('/buscarid/:id', auth, requireRole('admin', 'gerente', 'cajero'), ProductoController.BuscarId);
 
 /**
  * @openapi
@@ -86,7 +88,7 @@ router.get('/buscarid/:id', ProductoController.BuscarId);
  *       204: { description: Eliminado }
  *       404: { description: No encontrado }
  */
-router.delete('/eliminar/:id', ProductoController.eliminar);
+router.delete('/eliminar/:id', auth, requireRole('admin', 'gerente'), ProductoController.eliminar);
 
 /**
  * @openapi
@@ -112,6 +114,6 @@ router.delete('/eliminar/:id', ProductoController.eliminar);
  *             schema: { $ref: '#/components/schemas/Producto' }
  *       404: { description: No encontrado }
  */
-router.patch('/actualizar/:id', ProductoController.actualizar);
+router.patch('/actualizar/:id', auth, requireRole('admin', 'gerente'), ProductoController.actualizar);
 
 module.exports = router;

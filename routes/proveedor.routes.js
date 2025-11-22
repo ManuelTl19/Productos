@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const ProveedorController = require('../controllers/proveedor.controller');
+const auth = require('../middleware/auth');
+const requireRole = require('../middleware/roles');
 
 /**
  * @openapi
@@ -25,7 +27,7 @@ const ProveedorController = require('../controllers/proveedor.controller');
  *     responses:
  *       201: { description: Creado }
  */
-router.post('/guardarRegistro', ProveedorController.guardar);
+router.post('/guardarRegistro', auth, requireRole('admin', 'gerente'), ProveedorController.guardar);
 
 /**
  * @openapi
@@ -42,7 +44,7 @@ router.post('/guardarRegistro', ProveedorController.guardar);
  *               type: array
  *               items: { $ref: '#/components/schemas/Proveedor' }
  */
-router.get('/listar', ProveedorController.listarTodos);
+router.get('/listar', auth, requireRole('admin', 'gerente', 'cajero'), ProveedorController.listarTodos);
 
 /**
  * @openapi
@@ -63,7 +65,7 @@ router.get('/listar', ProveedorController.listarTodos);
  *             schema: { $ref: '#/components/schemas/Proveedor' }
  *       404: { description: No encontrado }
  */
-router.get('/buscarid/:id', ProveedorController.BuscarId);
+router.get('/buscarid/:id', auth, requireRole('admin', 'gerente', 'cajero'), ProveedorController.BuscarId);
 
 /**
  * @openapi
@@ -80,7 +82,7 @@ router.get('/buscarid/:id', ProveedorController.BuscarId);
  *       204: { description: Eliminado }
  *       404: { description: No encontrado }
  */
-router.delete('/eliminar/:id', ProveedorController.eliminar);
+router.delete('/eliminar/:id', auth, requireRole('admin', 'gerente'), ProveedorController.eliminar);
 
 /**
  * @openapi
@@ -106,6 +108,6 @@ router.delete('/eliminar/:id', ProveedorController.eliminar);
  *             schema: { $ref: '#/components/schemas/Proveedor' }
  *       404: { description: No encontrado }
  */
-router.patch('/actualizar/:id', ProveedorController.actualizar);
+router.patch('/actualizar/:id', auth, requireRole('admin', 'gerente'), ProveedorController.actualizar);
 
 module.exports = router;

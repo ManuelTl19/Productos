@@ -8,6 +8,7 @@ conection();
 
 const productoRoutes = require('./routes/producto.routes');
 const proveedorRoutes = require('./routes/proveedor.routes');
+const usuarioRoutes = require('./routes/usuario.routes');
 
 const { version }= require('mongoose');
 
@@ -29,6 +30,7 @@ app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Rutas de tu API
 app.use('/api/productos', productoRoutes);
 app.use('/api/proveedor', proveedorRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 
 // ---- Docs ----
 // OpenAPI JSON generado desde JSDoc
