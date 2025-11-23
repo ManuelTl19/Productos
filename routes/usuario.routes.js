@@ -3,37 +3,123 @@ const router = express.Router();
 const UsuarioController = require('../controllers/usuario.controller');
 const auth = require('../middleware/auth');
 const requireRole = require('../middleware/roles');
+/**
+ * @openapi
+ * tags:
+ *   - name: Usuarios
+ *     description: Operaciones con usuarios
+ */
 
-// Rutas públicas
+/**
+ * @openapi
+ * /api/usuarios/registrar:
+ *   post:
+ *     tags: [Usuarios]
+ *     summary: Crea un Usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Usuario'
+ *     responses:
+ *       201: { description: Creado }
+ */
 router.post('/registrar', UsuarioController.registrar);
+/**
+ * @openapi
+ * /api/usuarios/login:
+ *   post:
+ *     tags: [Usuarios]
+ *     summary: loguea un Usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Usuario'
+ *     responses:
+ *       201: { description: logueado }
+ */
 router.post('/login', UsuarioController.login);
-
+/**
+ * @openapi
+ * /api/usuarios/listar:
+ *   get:
+ *     tags: [Usuarios]
+ *     summary: Lista usuarios
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/Usuario' }
+ */
 // Listar → admin, gerente
-router.get('/listar', 
-    auth, 
-    requireRole("admin", "gerente"), 
-    UsuarioController.listar
-);
-
+router.get('/listar', auth, requireRole("admin", "gerente"), UsuarioController.listar);
+/**
+ * @openapi
+ * /api/usuarios/buscarid/{id}:
+ *   get:
+ *     tags: [Usuarios]
+ *     summary: Buscar usuarios con ID
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/Usuario' }
+ */
 // Buscar por ID → admin, gerente
-router.get('/buscarid/:id', 
-    auth, 
-    requireRole("admin", "gerente"), 
-    UsuarioController.BuscarId
-);
+router.get('/buscarid/:id', auth, requireRole("admin", "gerente"), UsuarioController.BuscarId);
 
+/**
+ * @openapi
+ * /api/usuarios/actualizar/{id}:
+ *   patch:
+ *     tags: [Usuarios]
+ *     summary: Actualiza usuario por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/Usuario' }
+ *     responses:
+ *       200:
+ *         description: Actualizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Usuarios' }
+ *       404: { description: No encontrado }
+ */
 // Actualizar → admin, gerente, cajero (pero cajero solo a sí mismo)
-router.put('/actualizar/:id', 
-    auth, 
-    requireRole("admin", "gerente", "cajero"), 
-    UsuarioController.actualizar
+router.put('/actualizar/:id', auth, requireRole("admin", "gerente", "cajero"), UsuarioController.actualizar
 );
-
+/**
+ * @openapi
+ * /api/usuarios/eliminar/{id}:
+ *   delete:
+ *     tags: [Usuarios]
+ *     summary: Elimina usuario por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204: { description: Eliminado }
+ *       404: { description: No encontrado }
+ */
 // Eliminar → admin, gerente, cajero (cajero solo su cuenta)
-router.delete('/eliminar/:id', 
-    auth, 
-    requireRole("admin", "gerente", "cajero"), 
-    UsuarioController.eliminar
-);
+router.delete('/eliminar/:id', auth, requireRole("admin", "gerente", "cajero"),  UsuarioController.eliminar);
 
 module.exports = router;

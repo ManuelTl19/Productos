@@ -1,7 +1,7 @@
 const UsuarioDB = require("../models/usuario.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+ const { getOrCreateUserRole } = require("../utils/rolDefault");
 // Registrar un nuevo usuario
 const registrar = async (req, res) => {
     try {
@@ -24,6 +24,8 @@ const registrar = async (req, res) => {
             });
         }
 
+        const rolDefecto = await getOrCreateUserRole();
+
         // Encriptar la contraseña
         const salt = bcrypt.genSaltSync(10);
         const passwordEncriptada = bcrypt.hashSync(password, salt);
@@ -32,7 +34,8 @@ const registrar = async (req, res) => {
             nombre,
             usuario,
             password: passwordEncriptada,
-            rol
+            rol,
+            role:rolDefecto._id
         });
 
         const usuarioGuardado = await nuevoUsuario.save();

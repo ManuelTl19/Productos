@@ -7,10 +7,21 @@ const m2s = require('mongoose-to-swagger');// convierte tus modelos de Mongoose 
 // Importa los modelos de Mongoose que quieres documentar
 const Producto = require('./models/productos.model');
 const Proveedor = require('./models/proveedor.model');
+const Usuario = require('./models/usuario.model');
+
+
+
+const Rol = require('./models/role.model');
+const Permiso = require('./models/permisos.model');
 
 // Convierte los modelos a esquema OpenAPI automáticamente
 const ProductoSchemaOpenAPI  = m2s(Producto);
 const ProveedorSchemaOpenAPI = m2s(Proveedor);
+const UsuarioSchemaOpenAPI = m2s(Usuario);
+
+
+const RolSchemaOpenAPI = m2s(Rol);
+const PermisoSchemaOpenAPI = m2s(Permiso);
 
 // Genera y exporta la configuración OpenAPI para usarla en Swagger UI u otros
 module.exports = swaggerJSDoc({
@@ -35,6 +46,9 @@ module.exports = swaggerJSDoc({
       schemas: {
         Producto: ProductoSchemaOpenAPI,
         Proveedor: ProveedorSchemaOpenAPI,
+        Usuario: UsuarioSchemaOpenAPI,
+        Rol: RolSchemaOpenAPI,
+        Permiso: PermisoSchemaOpenAPI,
       },
     },
   },
@@ -43,5 +57,8 @@ module.exports = swaggerJSDoc({
   apis: [
     './routes/producto.routes.js',
     './routes/proveedor.routes.js',
+    './routes/usuario.routes.js',
+    './routes/rol.routes.js',
+    './routes/permisos.routes.js',
   ],
 });

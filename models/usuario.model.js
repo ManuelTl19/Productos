@@ -25,7 +25,12 @@ const UsuarioSchema = new Schema(
             required: true,
             enum: ["admin", "gerente", "cajero"],
             default: "cajero"
-        }
+        },
+        roles: {
+            type: Schema.Types.ObjectId,
+            ref: 'Rol',
+            required: false,
+        },
     },
     {
         timestamps: true

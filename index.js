@@ -10,6 +10,9 @@ const productoRoutes = require('./routes/producto.routes');
 const proveedorRoutes = require('./routes/proveedor.routes');
 const usuarioRoutes = require('./routes/usuario.routes');
 
+const roles = require('./routes/rol.routes');
+const permiso= require('./routes/permisos.routes');
+
 const { version }= require('mongoose');
 
 const { apiReference } = require('@scalar/express-api-reference'); // <-- NUEVO
@@ -31,6 +34,9 @@ app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/productos', productoRoutes);
 app.use('/api/proveedor', proveedorRoutes);
 app.use('/api/usuarios', usuarioRoutes);
+
+app.use('/api/roles', roles);
+app.use('/api/permiso', permiso);
 
 // ---- Docs ----
 // OpenAPI JSON generado desde JSDoc
