@@ -2,71 +2,56 @@
 const PermisoDB = require("../models/permisos.model");
 
 // Opcional: define aquí los valores válidos (debes alinearlos con tu schema)
-const RECURSOS_VALIDOS = ['PRODUCTO', 'PROVEEDOR', 'USUARIO', 'OTRO'];
-const ACCIONES_VALIDAS = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'LIST', 'OTHER'];
+const RECURSOS_VALIDOS = ['PRODUCTO', 'PROVEEDOR', 'USER', 'ROL', 'PERMISOS'];
+const ACCIONES_VALIDAS = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'LIST'];
 
 // Registrar / crear un nuevo permiso
 const guardar = async (req, res) => {
-    try {
-        const { nombre, recurso, accion, descripcion, activo } = req.body;
+  try {
+    const { recurso, accion, descripcion, activo } = req.body;
 
-        // Validar campos obligatorios
-        if (!nombre || !recurso || !accion) {
-            return res.status(400).json({
-                status: "error",
-                message: "Faltan campos obligatorios: nombre, recurso o acción"
-            });
-        }
-
-        // Validar recurso/acción si quieres controlarlo aquí
-        if (!RECURSOS_VALIDOS.includes(recurso)) {
-            return res.status(400).json({
-                status: "error",
-                message: `Recurso inválido. Valores permitidos: ${RECURSOS_VALIDOS.join(", ")}`
-            });
-        }
-
-        if (!ACCIONES_VALIDAS.includes(accion)) {
-            return res.status(400).json({
-                status: "error",
-                message: `Acción inválida. Valores permitidos: ${ACCIONES_VALIDAS.join(", ")}`
-            });
-        }
-
-        // Verificar si el permiso ya existe (por nombre)
-        const existe = await PermisoDB.findOne({ nombre: nombre.toUpperCase() }).lean();
-        if (existe) {
-            return res.status(400).json({
-                status: "error",
-                message: "Ya existe un permiso con ese nombre"
-            });
-        }
-
-        const nuevoPermiso = new PermisoDB({
-            nombre,
-            recurso,
-            accion,
-            descripcion: descripcion || "",
-            activo: typeof activo === "boolean" ? activo : true
-        });
-
-        const permisoGuardado = await nuevoPermiso.save();
-
-        return res.status(201).json({
-            status: "success",
-            message: "Permiso registrado exitosamente",
-            data: permisoGuardado
-        });
-
-    } catch (error) {
-        console.log("Error al registrar permiso: ", error);
-        return res.status(500).json({
-            status: "error",
-            message: "Error en el servidor",
-            error: error.message
-        });
+    if (!recurso || !accion) {
+      return res.status(400).json({
+        status: "error",
+        message: "Recurso y acción son obligatorios",
+      });
     }
+
+    const nombre = `${recurso}_${accion}`.toUpperCase();
+
+    const existe = await PermisoDB.findOne({ nombre }).lean();
+    if (existe) {
+      return res.status(400).json({
+        status: "error",
+        message: "Ya existe un permiso con ese recurso y acción",
+      });
+    }
+
+    const nuevoPermiso = new PermisoDB({
+      nombre,                     
+      recurso,
+      accion,
+      descripcion: descripcion || "",
+      activo: typeof activo === "boolean" ? activo : true,
+    });
+
+    const permisoGuardado = await nuevoPermiso.save();
+
+    return res.status(201).json({
+      status: "success",
+      message: "Permiso registrado exitosamente",
+      data: permisoGuardado,
+    });
+  } catch (error) {
+    console.log("Error al registrar permiso: ", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Error en el servidor",
+      error: error.message,
+    });
+  }
 };
+
 
 // Listar todos los permisos
 const listar = async (req, res) => {

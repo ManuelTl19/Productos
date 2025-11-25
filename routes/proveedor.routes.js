@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const ProveedorController = require('../controllers/proveedor.controller');
 const auth = require('../middleware/auth');
-const requireRole = require('../middleware/roles');
+const { requirePermission } = require("../middleware/permisos");
 
 /**
  * @openapi
@@ -27,7 +27,7 @@ const requireRole = require('../middleware/roles');
  *     responses:
  *       201: { description: Creado }
  */
-router.post('/guardarRegistro', auth, requireRole('admin', 'gerente'), ProveedorController.guardar);
+router.post('/guardarRegistro', auth, requirePermission("PROVEEDOR_CREATE"), ProveedorController.guardar);
 
 /**
  * @openapi
@@ -44,7 +44,7 @@ router.post('/guardarRegistro', auth, requireRole('admin', 'gerente'), Proveedor
  *               type: array
  *               items: { $ref: '#/components/schemas/Proveedor' }
  */
-router.get('/listar', auth, requireRole('admin', 'gerente', 'cajero'), ProveedorController.listarTodos);
+router.get('/listar', auth, requirePermission("PROVEEDOR_LIST"), ProveedorController.listarTodos);
 
 /**
  * @openapi
@@ -65,7 +65,7 @@ router.get('/listar', auth, requireRole('admin', 'gerente', 'cajero'), Proveedor
  *             schema: { $ref: '#/components/schemas/Proveedor' }
  *       404: { description: No encontrado }
  */
-router.get('/buscarid/:id', auth, requireRole('admin', 'gerente', 'cajero'), ProveedorController.BuscarId);
+router.get('/buscarid/:id', auth,requirePermission("PROVEEDOR_LIST"), ProveedorController.BuscarId);
 
 /**
  * @openapi
@@ -82,7 +82,7 @@ router.get('/buscarid/:id', auth, requireRole('admin', 'gerente', 'cajero'), Pro
  *       204: { description: Eliminado }
  *       404: { description: No encontrado }
  */
-router.delete('/eliminar/:id', auth, requireRole('admin', 'gerente'), ProveedorController.eliminar);
+router.delete('/eliminar/:id', auth, requirePermission("PROVEEDOR_DELETE"), ProveedorController.eliminar);
 
 /**
  * @openapi
@@ -108,6 +108,6 @@ router.delete('/eliminar/:id', auth, requireRole('admin', 'gerente'), ProveedorC
  *             schema: { $ref: '#/components/schemas/Proveedor' }
  *       404: { description: No encontrado }
  */
-router.patch('/actualizar/:id', auth, requireRole('admin', 'gerente'), ProveedorController.actualizar);
+router.patch('/actualizar/:id', auth, requirePermission("PROVEEDOR_UPDATE"), ProveedorController.actualizar);
 
 module.exports = router;

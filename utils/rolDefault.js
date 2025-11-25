@@ -4,22 +4,54 @@ const PermisoDB = require("../models/permisos.model");
 const { ensureDefaultPermisos } = require("./permsDefault");
 
 async function getOrCreateUserRole() {
-  let rol = await RolDB.findOne({ nombre: "USER" });
+  let rol = await RolDB.findOne({ nombre: "ADMIN" });
   if (rol) return rol;
 
-  console.log("⚠️ Rol USER no existe, creando automáticamente...");
+  console.log("⚠️ Rol ADMIN no existe, creando automáticamente...");
 
   // 1) asegurar que existan los permisos por defecto
   await ensureDefaultPermisos();
 
   // 2) ahora sí, buscar los que quieres que tenga USER
   const permisosBasicos = await PermisoDB.find({
-    nombre: { $in: ["PRODUCTO_LIST", "PRODUCTO_READ"] }
+    nombre: {
+      $in: [
+        // PRODUCTO
+        "PRODUCTO_LIST",
+        "PRODUCTO_CREATE",
+        "PRODUCTO_UPDATE",
+        "PRODUCTO_DELETE",
+
+        // PROVEEDOR
+        "PROVEEDOR_LIST",
+        "PROVEEDOR_CREATE",
+        "PROVEEDOR_UPDATE",
+        "PROVEEDOR_DELETE",
+
+        // USER
+        "USER_LIST",
+        "USER_CREATE",
+        "USER_UPDATE",
+        "USER_DELETE",
+
+        // ROL
+        "ROL_LIST",
+        "ROL_CREATE",
+        "ROL_UPDATE",
+        "ROL_DELETE",
+
+        // PERMISOS
+        "PERMISOS_LIST",
+        "PERMISOS_CREATE",
+        "PERMISOS_UPDATE",
+        "PERMISOS_DELETE",
+      ],
+    }
   });
 
   rol = new RolDB({
     nombre: "USER",
-    descripcion: "Rol por defecto creado automáticamente",
+    descripcion: "Rol predefinido con permisos ",
     permisos: permisosBasicos.map(p => p._id),
     activo: true,
   });

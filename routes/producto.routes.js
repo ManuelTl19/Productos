@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const ProductoController = require('../controllers/producto.controller');
 const auth = require('../middleware/auth');
-const requireRole = require('../middleware/roles');
+const { requirePermission } = require("../middleware/permisos");
 
 /**
  * @openapi
@@ -32,7 +32,7 @@ const requireRole = require('../middleware/roles');
  */
 
 // en producto.routes.js
-router.post('/guardarRegistro', auth, requireRole('admin', 'gerente'), ProductoController.guardar);
+router.post('/guardarRegistro', auth, requirePermission("PRODUCTO_CREATE"),  ProductoController.guardar);
 
 
 /**
@@ -50,7 +50,7 @@ router.post('/guardarRegistro', auth, requireRole('admin', 'gerente'), ProductoC
  *               type: array
  *               items: { $ref: '#/components/schemas/Producto' }
  */
-router.get('/listar', auth, requireRole('admin', 'gerente', 'cajero'), ProductoController.listarTodos);
+router.get('/listar', auth, requirePermission("PRODUCTO_LIST"), ProductoController.listarTodos);
 
 /**
  * @openapi
@@ -71,7 +71,7 @@ router.get('/listar', auth, requireRole('admin', 'gerente', 'cajero'), ProductoC
  *             schema: { $ref: '#/components/schemas/Producto' }
  *       404: { description: No encontrado }
  */
-router.get('/buscarid/:id', auth, requireRole('admin', 'gerente', 'cajero'), ProductoController.BuscarId);
+router.get('/buscarid/:id', auth, requirePermission("PRODUCTO_LIST"),  ProductoController.BuscarId);
 
 /**
  * @openapi
@@ -88,7 +88,7 @@ router.get('/buscarid/:id', auth, requireRole('admin', 'gerente', 'cajero'), Pro
  *       204: { description: Eliminado }
  *       404: { description: No encontrado }
  */
-router.delete('/eliminar/:id', auth, requireRole('admin', 'gerente'), ProductoController.eliminar);
+router.delete('/eliminar/:id', auth, requirePermission("PRODUCTO_DELETE"),  ProductoController.eliminar);
 
 /**
  * @openapi
@@ -114,6 +114,6 @@ router.delete('/eliminar/:id', auth, requireRole('admin', 'gerente'), ProductoCo
  *             schema: { $ref: '#/components/schemas/Producto' }
  *       404: { description: No encontrado }
  */
-router.patch('/actualizar/:id', auth, requireRole('admin', 'gerente'), ProductoController.actualizar);
+router.patch('/actualizar/:id', auth, requirePermission("PRODUCTO_UPDATE"),  ProductoController.actualizar);
 
 module.exports = router;

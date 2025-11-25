@@ -3,8 +3,7 @@ const express = require('express');
 const router = express.Router();
 const RolController = require('../controllers/rol.controller');
 const auth = require('../middleware/auth');
-const requireRole = require('../middleware/roles');
-const requirePermission = require('../middleware/permisos');
+const { requirePermission } = require("../middleware/permisos");
 
 
 /**
@@ -19,7 +18,7 @@ const requirePermission = require('../middleware/permisos');
  * /api/roles/guardar:
  *   post:
  *     tags: [Rol]
- *     summary: Crea un proveedor
+ *     summary: Crea un rol
  *     requestBody:
  *       required: true
  *       content:
@@ -29,14 +28,14 @@ const requirePermission = require('../middleware/permisos');
  *     responses:
  *       201: { description: Creado }
  */
-router.post('/guardar', RolController.guardar);
+router.post('/guardar',auth,requirePermission("ROL_CREATE"), RolController.guardar);
 
 /**
  * @openapi
  * /api/roles/listar:
  *   get:
  *     tags: [Rol]
- *     summary: Lista proveedores
+ *     summary: Lista roles
  *     responses:
  *       200:
  *         description: OK
@@ -46,14 +45,14 @@ router.post('/guardar', RolController.guardar);
  *               type: array
  *               items: { $ref: '#/components/schemas/Rol' }
  */
-router.get('/listar', RolController.listar);
+router.get('/listar',auth,requirePermission("ROL_LIST"), RolController.listar);
 
 /**
  * @openapi
  * /api/roles/buscarid/{id}:
  *   get:
  *     tags: [Rol]
- *     summary: Obtiene proveedor por ID
+ *     summary: Obtiene rol por ID
  *     parameters:
  *       - in: path
  *         name: id
@@ -67,14 +66,14 @@ router.get('/listar', RolController.listar);
  *             schema: { $ref: '#/components/schemas/Rol' }
  *       404: { description: No encontrado }
  */
-router.get('/buscarid/:id',  RolController.BuscarId);
+router.get('/buscarid/:id',requirePermission("ROL_LIST"),  RolController.BuscarId);
 
 /**
  * @openapi
  * /api/roles/eliminar/{id}:
  *   delete:
  *     tags: [Rol]
- *     summary: Elimina proveedor por ID
+ *     summary: Elimina rol por ID
  *     parameters:
  *       - in: path
  *         name: id
@@ -84,14 +83,14 @@ router.get('/buscarid/:id',  RolController.BuscarId);
  *       204: { description: Eliminado }
  *       404: { description: No encontrado }
  */
-router.delete('/eliminar/:id',  RolController.eliminar);
+router.delete('/eliminar/:id',auth,requirePermission("ROL_DELETE"), RolController.eliminar);
 
 /**
  * @openapi
  * /api/roles/actualizar/{id}:
  *   patch:
  *     tags: [Rol]
- *     summary: Actualiza proveedor por ID
+ *     summary: Actualiza rol por ID
  *     parameters:
  *       - in: path
  *         name: id
@@ -110,6 +109,6 @@ router.delete('/eliminar/:id',  RolController.eliminar);
  *             schema: { $ref: '#/components/schemas/Rol' }
  *       404: { description: No encontrado }
  */
-router.patch('/actualizar/:id',  RolController.actualizar);
+router.patch('/actualizar/:id',auth,requirePermission("ROL_UPDATE"),  RolController.actualizar);
 
 module.exports = router;

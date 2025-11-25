@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const RolController = require('../controllers/permisos.controller');
 const auth = require('../middleware/auth');
-const requireRole = require('../middleware/roles');
+const { requirePermission } = require("../middleware/permisos");
 
 /**
  * @openapi
@@ -27,7 +27,7 @@ const requireRole = require('../middleware/roles');
  *     responses:
  *       201: { description: Creado }
  */
-router.post('/guardar',  RolController.guardar);
+router.post('/guardar',auth,requirePermission("PERMISOS_CREATE"), RolController.guardar);
 
 /**
  * @openapi
@@ -44,7 +44,7 @@ router.post('/guardar',  RolController.guardar);
  *               type: array
  *               items: { $ref: '#/components/schemas/Permiso' }
  */
-router.get('/listar', RolController.listar);
+router.get('/listar',auth,requirePermission("PERMISOS_LIST"), RolController.listar);
 
 /**
  * @openapi
@@ -65,7 +65,7 @@ router.get('/listar', RolController.listar);
  *             schema: { $ref: '#/components/schemas/Permiso' }
  *       404: { description: No encontrado }
  */
-router.get('/buscarid/:id',  RolController.BuscarId);
+router.get('/buscarid/:id',auth, requirePermission("PERMISOS_LIST"),  RolController.BuscarId);
 
 /**
  * @openapi
@@ -82,7 +82,7 @@ router.get('/buscarid/:id',  RolController.BuscarId);
  *       204: { description: Eliminado }
  *       404: { description: No encontrado }
  */
-router.delete('/eliminar/:id', RolController.eliminar);
+router.delete('/eliminar/:id',auth,requirePermission("PERMISOS_DELETE"), RolController.eliminar);
 
 /**
  * @openapi
@@ -108,6 +108,8 @@ router.delete('/eliminar/:id', RolController.eliminar);
  *             schema: { $ref: '#/components/schemas/Permiso' }
  *       404: { description: No encontrado }
  */
-router.patch('/actualizar/:id',  RolController.actualizar);
+router.patch('/actualizar/:id',auth,requirePermission("PERMISOS_UPDATE"),RolController.actualizar);
 
 module.exports = router;
+
+

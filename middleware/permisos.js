@@ -1,26 +1,32 @@
-// middleware/permisos.js
-module.exports = (...requiredPerms) => {
+// middleware/permissions.js
+
+// Este middleware asume que YA pasó por auth
+// y que auth puso req.user = { id, roles, permisos, ... }
+
+const requirePermission = (permisoNecesario) => {
   return (req, res, next) => {
-    if (!req.user) {
+    const user = req.user;
+
+    if (!user) {
       return res.status(401).json({
         status: "error",
         message: "No autenticado",
       });
     }
 
-    const userPerms = req.user.permisos || [];
+    const permisos = Array.isArray(user.permisos) ? user.permisos : [];
 
-    const tieneTodo = requiredPerms.every((perm) =>
-      userPerms.includes(perm)
-    );
-
-    if (!tieneTodo) {
+    if (!permisos.includes(permisoNecesario)) {
       return res.status(403).json({
         status: "error",
-        message: "No tienes permisos para realizar esta acción",
+        message: `No tienes el permiso requerido: ${permisoNecesario}`,
       });
     }
 
     next();
   };
+};
+
+module.exports = {
+  requirePermission,
 };

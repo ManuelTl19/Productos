@@ -1,39 +1,45 @@
+// middleware/auth.js
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "secret_local";
 
 const auth = (req, res, next) => {
-    try {
-        // 1. Leer el token desde los headers
-        let token = req.headers["x-token"] || req.headers["authorization"];
+  try {
+    // 1. Leer el token desde los headers
+    let token = req.headers["x-token"] || req.headers["authorization"];
 
-        // 2. Verificar que el token exista
-        if (!token) {
-            return res.status(401).json({
-                status: "error",
-                message: "No se proporcionó token de autenticación"
-            });
-        }
-
-        // Si el token viene con el prefijo "Bearer ", eliminarlo
-        if (token.startsWith("Bearer ")) {
-            token = token.slice(7, token.length).trim();
-        }
-
-        // 3. verificar el token con la clave secreta
-        const decoded = jwt.verify(token, "secret_local");
-
-        //4.- guardar info del usuarion en la peticion
-        req.user = decoded;
-
-        // 5. continuar al siguiente middleware o ruta
-        next();
-    } catch (error) {
-        console.log("Error en autenticación: ", error);
-        return res.status(401).json({
-            status: "error",
-            message: "Token inválido o expirado",
-            error: error.message
-        });
+    if (!token) {
+      return res.status(401).json({
+        status: "error",
+        message: "No se proporcionó token de autenticación",
+      });
     }
+
+    // Si viene como "Bearer xxx"
+    if (typeof token === "string" && token.startsWith("Bearer ")) {
+      token = token.slice(7).trim();
+    }
+
+    // 2. Verificar el token con la misma clave que usas en login
+    const decoded = jwt.verify(token, JWT_SECRET);
+    // decoded = { uid, roles, permisos, iat, exp }
+
+    // 3. Normalizar lo que vas a usar en el resto del backend
+    req.user = {
+      id: decoded.uid,
+      roles: decoded.roles || [],
+      permisos: decoded.permisos || [],
+      raw: decoded, // opcional, por si luego quieres todo
+    };
+
+    next();
+  } catch (error) {
+    console.log("Error en autenticación: ", error);
+    return res.status(401).json({
+      status: "error",
+      message: "Token inválido o expirado",
+      error: error.message,
+    });
+  }
 };
 
 module.exports = auth;

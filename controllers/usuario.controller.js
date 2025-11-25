@@ -1,11 +1,13 @@
 const UsuarioDB = require("../models/usuario.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
- const { getOrCreateUserRole } = require("../utils/rolDefault");
+const { getOrCreateUserRole } = require("../utils/rolDefault");
+const JWT_SECRET = process.env.JWT_SECRET || "secret_local";
+
 // Registrar un nuevo usuario
 const registrar = async (req, res) => {
     try {
-        const { nombre, usuario, password, rol } = req.body;
+        const { nombre, usuario, password, rol, roles } = req.body;
 
         // Verificar compos obligatorios
         if (!nombre || !usuario || !password) {
@@ -35,7 +37,7 @@ const registrar = async (req, res) => {
             usuario,
             password: passwordEncriptada,
             rol,
-            role:rolDefecto._id
+            roles:[rolDefecto._id]
         });
 
         const usuarioGuardado = await nuevoUsuario.save();
@@ -56,67 +58,99 @@ const registrar = async (req, res) => {
     }
 }
 
+
 const login = async (req, res) => {
-    try {
-        const { usuario, password } = req.body;
+  try {
+    const { usuario, password } = req.body;
 
-        // 1) Buscar usuario por su nombre/username (puede ser email si lo usas así)
-        const user = await UsuarioDB.findOne({ usuario });
-        if (!user) {
-            return res.status(404).json({
-                status: "error",
-                message: "Usuario no encontrado"
-            });
-        }
+    const user = await UsuarioDB.findOne({ usuario })
+      .populate({
+        path: "roles",
+        populate: {
+          path: "permisos",
+          model: "Permiso",
+        },
+      });
 
-        // 2) Comparar la contraseña enviada con la contraseña hasheada en la BD
-        // bcrypt.compareSync devuelve true si coinciden
-        const passwordValida = bcrypt.compareSync(password, user.password);
-        if (!passwordValida) {
-            return res.status(400).json({
-                status: "error",
-                message: "Contraseña incorrecta"
-            });
-        }
-
-        // 3) Generar el token JWT
-        //   - payload: datos que quieres guardar en el token (nombre mínimo: id y rol)
-        //   - firma usando process.env.JWT_SECRET
-        //   - expiresIn controla la expiración
-        const payload = { uid: user._id, rol: user.rol };
-        const token = jwt.sign(payload, "secret_local", {
-            expiresIn: "1h"
-        });
-
-        // 4) Responder con token + datos del usuario (sin password)
-        return res.status(200).json({
-            status: "success",
-            message: "Inicio de sesión exitoso",
-            data: {
-                user: {
-                    id: user._id,
-                    nombre: user.nombre,
-                    usuario: user.usuario,
-                    rol: user.rol
-                },
-                token
-            }
-        });
-
-    } catch (error) {
-        console.log("Error en login: ", error);
-        return res.status(500).json({
-            status: "error",
-            message: "Error en el servidor",
-            error: error.message
-        });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Usuario no encontrado",
+      });
     }
+
+    const passwordValida = bcrypt.compareSync(password, user.password);
+    if (!passwordValida) {
+      return res.status(400).json({
+        status: "error",
+        message: "Contraseña incorrecta",
+      });
+    }
+
+    // 🔹 Normalizar roles a arreglo
+    const rolesRaw = user.roles;
+    const rolesArray = Array.isArray(rolesRaw)
+      ? rolesRaw
+      : rolesRaw
+      ? [rolesRaw]
+      : [];
+
+    // roles del usuario (solo id + nombre para el front)
+    const rolesUsuario = rolesArray.map((rol) => ({
+      id: rol._id,
+      nombre: rol.nombre,
+    }));
+
+    // permisos = unión de todos los permisos activos de todos los roles
+    const permisosUsuario = Array.from(
+      new Set(
+        rolesArray.flatMap((rol) =>
+          (rol.permisos || [])
+            .filter((p) => p && p.activo)
+            .map((p) => p.nombre)
+        )
+      )
+    );
+
+    const payload = {
+      uid: user._id,
+      roles: rolesUsuario.map((r) => r.id),
+      permisos: permisosUsuario,
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    console.log("Roles del usuario:", JSON.stringify(rolesArray, null, 2));
+    console.log("Permisos calculados:", permisosUsuario);
+    return res.status(200).json({
+      status: "success",
+      message: "Inicio de sesión exitoso",
+      data: {
+        user: {
+          id: user._id,
+          nombre: user.nombre,
+          usuario: user.usuario,
+          roles: rolesUsuario,
+          permisos: permisosUsuario,
+        },
+        token,
+      },
+    });
+  } catch (error) {
+    console.log("Error en login: ", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Error en el servidor",
+      error: error.message,
+    });
+  }
 };
 
 // Listar todos los usuarios
 const listar = async (req, res) => {
     try {
-        const usuarios = await UsuarioDB.find().select("-password").lean();
+        const usuarios = await UsuarioDB.find().populate("roles").select("-password").lean();
 
         return res.status(200).json({
             status: "success",
@@ -165,13 +199,13 @@ const BuscarId = async (req, res) => {
 const actualizar = async (req, res) => {
     try {
         const id = req.params.id;
-        const { nombre, usuario, password, rol } = req.body;
+        const { nombre, usuario, password, roles } = req.body;
 
         const datosActualizar = {};
 
         if (nombre) datosActualizar.nombre = nombre;
         if (usuario) datosActualizar.usuario = usuario;
-        if (rol) datosActualizar.rol = rol;
+        if (roles) datosActualizar.roles = roles;
 
         // Si va a actualizar contraseña, encriptar
         if (password) {

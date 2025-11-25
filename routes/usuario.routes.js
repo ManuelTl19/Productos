@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const UsuarioController = require('../controllers/usuario.controller');
 const auth = require('../middleware/auth');
-const requireRole = require('../middleware/roles');
+const { requirePermission } = require("../middleware/permisos");
 /**
  * @openapi
  * tags:
@@ -58,7 +58,7 @@ router.post('/login', UsuarioController.login);
  *               items: { $ref: '#/components/schemas/Usuario' }
  */
 // Listar → admin, gerente
-router.get('/listar', auth, requireRole("admin", "gerente"), UsuarioController.listar);
+router.get('/listar',auth,requirePermission("USER_LIST"), UsuarioController.listar);
 /**
  * @openapi
  * /api/usuarios/buscarid/{id}:
@@ -75,7 +75,7 @@ router.get('/listar', auth, requireRole("admin", "gerente"), UsuarioController.l
  *               items: { $ref: '#/components/schemas/Usuario' }
  */
 // Buscar por ID → admin, gerente
-router.get('/buscarid/:id', auth, requireRole("admin", "gerente"), UsuarioController.BuscarId);
+router.get('/buscarid/:id',auth, requirePermission("USER_LIST"),UsuarioController.BuscarId);
 
 /**
  * @openapi
@@ -102,8 +102,7 @@ router.get('/buscarid/:id', auth, requireRole("admin", "gerente"), UsuarioContro
  *       404: { description: No encontrado }
  */
 // Actualizar → admin, gerente, cajero (pero cajero solo a sí mismo)
-router.put('/actualizar/:id', auth, requireRole("admin", "gerente", "cajero"), UsuarioController.actualizar
-);
+router.patch('/actualizar/:id',auth,requirePermission("USER_UPDATE"), UsuarioController.actualizar);
 /**
  * @openapi
  * /api/usuarios/eliminar/{id}:
@@ -120,6 +119,6 @@ router.put('/actualizar/:id', auth, requireRole("admin", "gerente", "cajero"), U
  *       404: { description: No encontrado }
  */
 // Eliminar → admin, gerente, cajero (cajero solo su cuenta)
-router.delete('/eliminar/:id', auth, requireRole("admin", "gerente", "cajero"),  UsuarioController.eliminar);
+router.delete('/eliminar/:id', auth, requirePermission("USER_DELETE"),  UsuarioController.eliminar);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const RolDB = require("../models/role.model");
 const PermisoDB = require("../models/permisos.model");
 
-// Registrar / crear un nuevo rol
+// Registrar / crear un nuevo rol// controllers/permiso.controller.js// controllers/permiso.controller.js
 const guardar = async (req, res) => {
     try {
         const { nombre, descripcion, permisos, activo } = req.body;
@@ -65,7 +65,6 @@ const guardar = async (req, res) => {
         });
     }
 };
-
 // Listar todos los roles
 const listar = async (req, res) => {
     try {
