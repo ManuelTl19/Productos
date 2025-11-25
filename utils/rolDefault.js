@@ -50,7 +50,7 @@ async function getOrCreateUserRole() {
   });
 
   rol = new RolDB({
-    nombre: "USER",
+    nombre: "ADMIN",
     descripcion: "Rol predefinido con permisos ",
     permisos: permisosBasicos.map(p => p._id),
     activo: true,
