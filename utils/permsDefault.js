@@ -32,9 +32,6 @@ const PERMISOS_DEFAULT = [
   { nombre: 'PERMISOS_UPDATE', recurso: 'PERMISOS', accion: 'UPDATE', descripcion: 'Actualizar permisos' },
   { nombre: 'PERMISOS_DELETE', recurso: 'PERMISOS', accion: 'DELETE', descripcion: 'Eliminar permisos' },
 
-
-
-
 ];
 
 async function ensureDefaultPermisos() {

@@ -3,13 +3,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { getOrCreateUserRole } = require("../utils/rolDefault");
 const JWT_SECRET = process.env.JWT_SECRET || "secret_local";
-
 // Registrar un nuevo usuario
 const registrar = async (req, res) => {
   try {
-    const { nombre, usuario, password, rol, roles } = req.body;
+    const { nombre, usuario, password, roles } = req.body;
 
-    // Verificar compos obligatorios
+    // Verificar campos obligatorios
     if (!nombre || !usuario || !password) {
       return res.status(400).json({
         status: "error",
@@ -17,7 +16,6 @@ const registrar = async (req, res) => {
       });
     }
 
-    // verificar si el usuario ya existe
     const existe = await UsuarioDB.findOne({ usuario }).lean();
     if (existe) {
       return res.status(400).json({
@@ -26,18 +24,24 @@ const registrar = async (req, res) => {
       });
     }
 
-    const rolDefecto = await getOrCreateUserRole();
-
-    // Encriptar la contraseña
+    // Encriptar contraseña
     const salt = bcrypt.genSaltSync(10);
     const passwordEncriptada = bcrypt.hashSync(password, salt);
+
+    let rolesAsignados;
+
+    if (roles) {
+      rolesAsignados = [roles];
+    } else {
+      const rolDefecto = await getOrCreateUserRole();
+      rolesAsignados = [rolDefecto._id];
+    }
 
     const nuevoUsuario = new UsuarioDB({
       nombre,
       usuario,
       password: passwordEncriptada,
-      rol,
-      roles: [rolDefecto._id]
+      roles: rolesAsignados
     });
 
     const usuarioGuardado = await nuevoUsuario.save();
@@ -56,8 +60,7 @@ const registrar = async (req, res) => {
       error: error.message
     });
   }
-}
-
+};
 
 const login = async (req, res) => {
   try {
@@ -87,7 +90,6 @@ const login = async (req, res) => {
       });
     }
 
-    // 🔹 Normalizar roles a arreglo
     const rolesRaw = user.roles;
     const rolesArray = Array.isArray(rolesRaw)
       ? rolesRaw
@@ -95,13 +97,11 @@ const login = async (req, res) => {
         ? [rolesRaw]
         : [];
 
-    // roles del usuario (solo id + nombre para el front)
     const rolesUsuario = rolesArray.map((rol) => ({
       id: rol._id,
       nombre: rol.nombre,
     }));
 
-    // permisos = unión de todos los permisos activos de todos los roles
     const permisosUsuario = Array.from(
       new Set(
         rolesArray.flatMap((rol) =>
@@ -119,7 +119,7 @@ const login = async (req, res) => {
     };
 
     const token = jwt.sign(payload, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "5s",
     });
 
     console.log("Roles del usuario:", JSON.stringify(rolesArray, null, 2));
@@ -201,8 +201,8 @@ const actualizar = async (req, res) => {
   try {
     const id = req.params.id;
     const { nombre, usuario, password, roles } = req.body;
-
     const datosActualizar = {};
+    console.log("BODY recibido:", req.body);
 
     if (nombre) datosActualizar.nombre = nombre;
     if (usuario) datosActualizar.usuario = usuario;
